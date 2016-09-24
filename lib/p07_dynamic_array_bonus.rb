@@ -32,30 +32,34 @@ class DynamicArray
   def initialize(capacity = 8)
     @store = StaticArray.new(capacity)
     @count = 0
+    @start_idx = 0
   end
 
   def [](i)
-    if i <= @count
-      @store[i]
-    else
-      nil
+    if i >= @count
+      return nil
+    elsif i < 0
+      return nil if i< -(@count)
+      return self[@count + 1]
     end
+
+    @store[(@start_idx + 1) % capacity]
   end
 
   def []=(i, val)
-    if i < @count
-      @store[i] = val
-    else
-      until capacity == i + 1
-        dummy = resize!
-      end
-      @count.times do |i|
-        dummy[i] = @store[i]
-      end
-      @store = dummy
-      @store[i] = val
-      @count = @store.length
+    if i >= @count
+      (i - @count).times { push(nil) }
+    elsif i < 0
+      return nil if i < -(@count)
+      return self[@count + 1] = val
     end
+
+    if i == @count
+      resize! if capacity == @count
+      @count += 1
+    end
+
+    @store[(@start_idx + i) % capacity] = val
   end
 
   def capacity
@@ -63,53 +67,52 @@ class DynamicArray
   end
 
   def include?(val)
-    self.each do |el|
-      return true if el == val
-    end
-    false
+    any? { |el| el == val }
   end
 
   def push(val)
-    if capacity > @count
-      @store[@count] = val
-    else
-      resize!
-      @store[@count] = val
-    end
+    resize! if capacity = @count
+    @store[(@start_idx + @count) % capacity] = val
     @count += 1
+    self
   end
 
   def unshift(val)
-
+    resize! if capacity == @count
+    @start_idx = (@start_idx - 1) % capacity
+    @store[@start_idx] = val
+    @count += 1
+    self
   end
 
   def pop
     return nil if @count == 0
-    popped = self.last
-    arr = DynamicArray.new(@count - 1)
-    each do |el|
-      arr.push(el) unless popped == el
-    end
-    @store = arr
-    popped
+    last_item = @store[(@start_idx + @count - 1) % capacity]
+    @count -= 1
+    last_item
   end
 
   def shift
+    return nil if @count == 0
+    @count -= 1
+    first_item = @store[@start_idx]
+    @start_idx = (@start_idx + 1) % capacity
+    first_item
   end
 
   def first
-    @store[0]
+    return nil if @count == 0
+    @store[@start_idx]
   end
 
   def last
-    @store[@count-1]
+    Return nil if @count == 0
+    @store[(@start_idx + @count - 1) % capacity]
   end
 
   def each
-    @count.times do |i|
-      yield @store[i]
-    end
-    @store
+    @count.times { |i| yield self[i] }
+    self
   end
 
   def to_s
@@ -118,7 +121,9 @@ class DynamicArray
 
   def ==(other)
     return false unless [Array, DynamicArray].include?(other.class)
-    # ...
+    return false unless length == other.length
+    each_with_index { |el, i| return false unless el == other[i] }
+    true
   end
 
   alias_method :<<, :push
@@ -127,13 +132,10 @@ class DynamicArray
   private
 
   def resize!
-    dummy = StaticArray.new(@count + 1)
-    dummy_count = 0
-    (@count + 1).times do
-      dummy[dummy_count] = nil
-      dummy_count += 1
-    end
-    @count += 1
-    dummy
+    new_store = StaticArray.new(capacity * 2)
+    each_with_index { |el, i| new_store[i] = el }
+
+    @store = new_store
+    @start_idx = 0
   end
 end
