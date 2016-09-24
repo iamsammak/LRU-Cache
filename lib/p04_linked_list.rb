@@ -41,50 +41,66 @@ class LinkedList
   end
 
   def get(key)
-    current_link = @head.next
-    until current_link.next.nil?
-      found_key = current_link.key
-      return current_link.val if key == found_key
-      current_link = current_link.next
-    end
+    # current_link = @head.next
+    # until current_link.next.nil?
+    #   found_key = current_link.key
+    #   return current_link.val if key == found_key
+    #   current_link = current_link.next
+    # end
+
+    each { |link| return link.val if link.key == key }
 
     nil
   end
 
   def include?(key)
-    current_link = @head.next
-    until current_link.next.nil?
-      found_key = current_link.key
-      return true if key == found_key
-      current_link = current_link.next
-    end
+    # current_link = @head.next
+    # until current_link.next.nil?
+    #   found_key = current_link.key
+    #   return true if key == found_key
+    #   current_link = current_link.next
+    # end
+    #
+    # false
 
-    false
+    any? { |link| link.key == key }
   end
 
   def insert(key, val)
+    # each { |link| return link.val = val if link.key == key }
+
     new_link = Link.new(key, val)
-    new_link.prev = @tail.prev
+
     @tail.prev.next = new_link
-    @tail.prev = new_link
+    new_link.prev = @tail.prev
     new_link.next = @tail
-    
+    @tail.prev = new_link
+
     new_link
   end
 
   def remove(key)
-    current_link = @head.next
+    # current_link = @head.next
+    #
+    # until current_link.next.nil?
+    #
+    #   found_key = current_link.key
+    #   if key == found_key
+    #     current_link.prev.next = current_link.next
+    #     current_link.next.prev = current_link.prev
+    #     break
+    #   end
+    #
+    #   current_link = current_link.next
+    # end
 
-    until current_link.next.nil?
-
-      found_key = current_link.key
-      if key == found_key
-        current_link.prev.next = current_link.next
-        current_link.next.prev = current_link.prev
-        break
+    each do |link|
+      if link.key == key
+        link.prev.next = link.next
+        link.next.prev = link.prev
+        link.next, link.prev = nil. nil
+        return link.val
       end
-
-      current_link = current_link.next
     end
 
     nil
@@ -92,7 +108,8 @@ class LinkedList
 
   def each
     current_link = @head.next
-    until current_link.next.nil?
+
+    until current_link == @tail
       yield current_link
       current_link = current_link.next
     end
