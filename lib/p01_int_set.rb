@@ -38,6 +38,7 @@ class IntSet
   end
 
   def insert(num)
+    return false if include?(num)
     self[num] << num
   end
 
@@ -46,16 +47,16 @@ class IntSet
   end
 
   def include?(num)
-    return true if self[num].include?(num)
-    false
+    # return true if self[num].include?(num)
+    # false
+    self[num].include?(num)
   end
 
   private
 
   def [](num)
     # optional but useful; return the bucket corresponding to `num`
-    val = num % num_buckets
-    @store[val]
+    @store[num % num_buckets]
   end
 
   def num_buckets
@@ -72,6 +73,7 @@ class ResizingIntSet
   end
 
   def insert(num)
+    return false if include?(num)
     self[num] << num
     @count += 1
     resize! if num_buckets < @count
@@ -83,16 +85,14 @@ class ResizingIntSet
   end
 
   def include?(num)
-    return true if self[num].include?(num)
-    false
+    self[num].include?(num)
   end
 
   private
 
   def [](num)
     # optional but useful; return the bucket corresponding to `num`
-    val = num % num_buckets
-    @store[val]
+    @store[num % num_buckets]
   end
 
   def num_buckets
@@ -100,11 +100,9 @@ class ResizingIntSet
   end
 
   def resize!
-    new_buckets = num_buckets * 2
-    dummy = Array.new(new_buckets) { Array.new }
-    @store.flatten.each do |el|
-      dummy[el % new_buckets] << el
-    end
-    @store = dummy
+    dummy = @store
+    @count = 0
+    @store = Array.new(num_buckets * 2) { Array.new }
+    dummy.flatten.each { |el| insert(el) }
   end
 end
