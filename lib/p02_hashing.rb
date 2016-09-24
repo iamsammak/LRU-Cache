@@ -9,20 +9,30 @@ class Array
       if el.is_a?(Array)
         return el.hash
       else
-        sum += el^i
+        sum += el ^ i
       end
     end
     sum.hash
   end
+
+  # def hash
+  #   each_with_index.inject(0) do |intermediate_hash, (el, i)|
+  #     (el.hash + i.hash) ^ intermediate_hash
+  #   end
+  # end
 end
 
 class String
+  # def hash
+  #   sum = 0
+  #   self.chars.each_with_index do |letter, i|
+  #     sum += letter.ord^i
+  #   end
+  #   sum.hash
+  # end
+
   def hash
-    sum = 0
-    self.chars.each_with_index do |letter, i|
-      sum += letter.ord^i
-    end
-    sum.hash
+    chars.map(&:ord).hash
   end
 end
 
@@ -37,4 +47,8 @@ class Hash
     end
     xored.sort.hash
   end
+
+  # def hash
+  #   to_a.sort_by(&:hash).hash
+  # end
 end
